@@ -129,8 +129,8 @@ const CONFIG = {
   tagline: "K\u00f6yden Sofraya \u2014 %100 Do\u011fal Dana Sucuk & Tam Ya\u011fl\u0131 \u0130nek Peyniri",
   about: "A\u011falar\u0131n Palas\u0131 olarak tan\u0131nan Pala Day\u0131 ve Garda\u015flar\u0131, k\u00f6y\u00fcn bereketini sofran\u0131za ta\u015f\u0131yor. %100 dana sucuk ve tam ya\u011fl\u0131 inek peyniri, geleneksel y\u00f6ntemlerle \u00fcretilip 81 ile kargo ile g\u00f6nderilir. Do\u011fal, katk\u0131s\u0131z, k\u00f6y\u00fcn ta kendisi.",
 
-  phone: "+905555483003",
-  whatsapp: "905555483003",
+  phone: "+905555483000",
+  whatsapp: "905555483000",
   instagram: "paladayivegardaslari",
 
   colors: {
@@ -149,7 +149,7 @@ const CONFIG = {
 
   priceUpdated: "",
 
-  cartEnabled: true,
+  cartEnabled: false,   // sipariş artık formun içinde (+/-) veriliyor, açılır sepet kapalı
 
   announcement: "\uD83D\uDE9A T\u00fcrkiye'nin her yerine kargo ile g\u00f6nderim \u2014 Kargo al\u0131c\u0131ya aittir",
   vacationNote: "",
@@ -162,7 +162,12 @@ const CONFIG = {
 
   sheetsUrl: "",
 
-  sectionOrder: ["menu","urunler","hakkinda"],
+  // Ödeme IBAN'ı — dolunca IBAN kutusunda otomatik görünür (kopyala butonuyla).
+  // Boş "" bırakırsan kutu "yakında eklenecektir" yazar. ŞU AN BOŞ.
+  iban: "",
+  ibanName: "",   // IBAN sahibi ad soyad (opsiyonel)
+
+  sectionOrder: ["siparis","iban","urunler","hakkinda","sss"],
 
   faq: [
     { q: "Sipari\u015f nas\u0131l verilir?", a: "Siteden \u00fcr\u00fcnlerinizi se\u00e7ip sepete ekleyin, adresinizi yaz\u0131n ve WhatsApp'\u0131 a\u00e7\u0131n. Size IBAN bilgisi iletilecektir. \u00d6deme sonras\u0131 kargonuz haz\u0131rlan\u0131r." },
@@ -695,6 +700,63 @@ footer .credit{margin-top:18px;font-size:.8rem;opacity:.55}
   line-height:1.6;
 }
 
+/* ---------- Form içi ürün +/- (Pala Dayı) ---------- */
+.order-items{
+  display:flex;flex-direction:column;gap:12px;margin-bottom:20px;
+}
+.order-item-row{
+  background:#fff;border:1.5px solid #e8e0d4;border-radius:12px;
+  padding:14px 16px;display:flex;align-items:center;gap:12px;
+  box-shadow:var(--shadow);transition:border-color .2s;
+}
+.order-item-row.on{border-color:var(--accent)}
+.oi-info{flex:1;min-width:0}
+.oi-name{font-family:var(--font-head);font-weight:700;color:var(--secondary);font-size:1.05rem}
+.oi-price{font-weight:800;color:var(--primary);font-size:.95rem;margin-top:2px}
+.oi-desc{font-size:.8rem;opacity:.62;margin-top:3px;line-height:1.4}
+.oi-ctrl{display:flex;align-items:center;gap:8px;flex:none}
+.oi-ctrl button{
+  width:40px;height:40px;flex:none;border-radius:10px;
+  border:1.5px solid var(--primary);background:#fff;color:var(--primary);
+  font-size:1.35rem;font-weight:800;line-height:1;cursor:pointer;
+  font-family:var(--font-body);
+  display:inline-flex;align-items:center;justify-content:center;
+  transition:background .15s;
+}
+.oi-ctrl button:active{background:var(--primary);color:#fff}
+.oi-qty{min-width:26px;text-align:center;font-weight:800;font-size:1.1rem;color:var(--secondary)}
+.order-total{
+  text-align:right;font-weight:800;font-size:1.2rem;color:var(--secondary);
+  border-top:2px solid var(--accent);padding-top:12px;margin-bottom:22px;
+  display:none;
+}
+
+/* ---------- IBAN kutusu ---------- */
+.iban-box{
+  max-width:600px;margin:0 auto;
+  border:2px solid var(--accent);border-radius:14px;background:#fff;
+  box-shadow:var(--shadow);padding:24px 20px;text-align:center;
+}
+.iban-box h3{
+  font-family:var(--font-head);color:var(--primary);
+  font-size:1.3rem;margin-bottom:12px;
+}
+.iban-num{
+  font-weight:800;font-size:1.05rem;letter-spacing:.5px;color:var(--secondary);
+  background:var(--bg);border-radius:10px;padding:14px 12px;
+  word-break:break-all;user-select:all;
+}
+.iban-name{margin-top:10px;font-size:.92rem;opacity:.75;font-weight:700}
+.iban-empty{opacity:.6;font-style:italic;font-size:.95rem}
+.iban-copy{
+  margin-top:14px;min-height:46px;padding:10px 22px;cursor:pointer;
+  border:1.5px solid var(--primary);border-radius:999px;
+  background:var(--primary);color:#fff;
+  font-family:var(--font-body);font-weight:800;font-size:.92rem;
+  transition:transform .2s;
+}
+.iban-copy:active{transform:scale(.97)}
+
 /* ---------- Scroll animasyonu ---------- */
 .reveal{
   opacity:0;transform:translateY(24px);
@@ -767,12 +829,40 @@ footer .credit{margin-top:18px;font-size:.8rem;opacity:.55}
   <p class="menu-note reveal">Fiyatlarımız güncel olup KDV dahildir.</p>
 </section>
 
-<section id="siparis" style="display:none">
-  <h2 class="section-title reveal">Özel Pasta Siparişi</h2>
-  <p class="section-sub reveal">Formu doldurun, WhatsApp'tan hemen iletilsin</p>
-  <div class="order-form reveal" id="orderForm">
-    <!-- JS dolduruyor -->
+<section id="siparis">
+  <h2 class="section-title reveal">Sipariş Ver</h2>
+  <p class="section-sub reveal">Ürün adedini seçin, WhatsApp'tan anında iletilsin</p>
+  <div class="order-form reveal">
+    <div class="order-items" id="orderItems"><!-- JS dolduruyor: sucuk / peynir +/- --></div>
+    <p class="order-total" id="orderTotal"></p>
+    <div class="form-group">
+      <label>Ad Soyad</label>
+      <input type="text" id="ofName" placeholder="Adınız Soyadınız">
+    </div>
+    <div class="form-group">
+      <label>Telefon</label>
+      <input type="tel" id="ofPhone" placeholder="(5XX) XXX XX XX">
+    </div>
+    <div class="form-group">
+      <label>Kargo Adresi</label>
+      <textarea id="ofAddress" placeholder="Mahalle, sokak, bina no, ilçe / il..."></textarea>
+    </div>
+    <div class="form-group">
+      <label>Not (isteğe bağlı)</label>
+      <textarea id="ofMsg" placeholder="Eklemek istediğiniz bir not..."></textarea>
+    </div>
+    <div class="form-note-box" style="margin-top:12px">
+      💰 Sipariş sonrası IBAN bilgisi WhatsApp üzerinden iletilecektir.<br>
+      Ödeme sonrası kargonuz hazırlanır. Kargo ücreti alıcıya aittir.
+    </div>
+    <button type="button" class="btn-order" id="ofSubmit">WhatsApp'tan Sipariş Ver ❯</button>
   </div>
+</section>
+
+<section id="iban">
+  <h2 class="section-title reveal">Ödeme Bilgileri</h2>
+  <p class="section-sub reveal">Havale / EFT ile ödeme</p>
+  <div class="iban-box reveal" id="ibanBox"><!-- JS dolduruyor --></div>
 </section>
 
 <section class="about" id="hakkinda">
@@ -1174,6 +1264,115 @@ footer .credit{margin-top:18px;font-size:.8rem;opacity:.55}
       </div>`;
     bg.appendChild(el);
   });
+
+  /* ═══════════ FORM İÇİ SİPARİŞ (Pala Dayı: sucuk / peynir +/-) ═══════════ */
+  (function(){
+    const oiEl = document.getElementById('orderItems');
+    if (!oiEl) return;
+
+    // Menüdeki tüm ürünler tek listede toplanır (fiyat tek kaynaktan)
+    const products = [];
+    (C.menu || []).forEach(cat => (cat.items || []).forEach(it => products.push(it)));
+    const priceNum = p => parseInt(String(p).replace(/\D/g, '')) || 0;
+    const qtys = products.map(() => 0);
+
+    oiEl.innerHTML = products.map((it, i) => `
+      <div class="order-item-row" data-i="${i}">
+        <div class="oi-info">
+          <div class="oi-name">${it.name}</div>
+          <div class="oi-price">${it.price}</div>
+          ${it.desc ? `<div class="oi-desc">${it.desc}</div>` : ''}
+        </div>
+        <div class="oi-ctrl">
+          <button type="button" data-dec="${i}" aria-label="${it.name} azalt">−</button>
+          <span class="oi-qty" id="oiQty${i}">0</span>
+          <button type="button" data-inc="${i}" aria-label="${it.name} arttır">+</button>
+        </div>
+      </div>`).join('');
+
+    const totalEl = document.getElementById('orderTotal');
+    function render(){
+      let sum = 0, any = false;
+      products.forEach((it, i) => {
+        if (qtys[i] > 0){ any = true; sum += qtys[i] * priceNum(it.price); }
+        document.getElementById('oiQty' + i).textContent = qtys[i];
+        oiEl.querySelector(`[data-i="${i}"]`).classList.toggle('on', qtys[i] > 0);
+      });
+      if (any){ totalEl.textContent = 'Toplam: ' + sum.toLocaleString('tr-TR') + ' TL'; totalEl.style.display = 'block'; }
+      else { totalEl.style.display = 'none'; }
+    }
+
+    oiEl.addEventListener('click', e => {
+      const inc = e.target.closest('[data-inc]');
+      const dec = e.target.closest('[data-dec]');
+      if (inc){ qtys[+inc.dataset.inc]++; render(); }
+      if (dec){ const i = +dec.dataset.dec; if (qtys[i] > 0){ qtys[i]--; render(); } }
+    });
+    render();
+
+    // Sipariş Ver → hazır WhatsApp mesajı
+    document.getElementById('ofSubmit').addEventListener('click', () => {
+      if (C.vacationLock && C.vacationNote){ alert(C.vacationNote); return; }
+      const chosen = products.map((it, i) => ({ it, q: qtys[i] })).filter(x => x.q > 0);
+      if (!chosen.length){ alert('Lütfen en az bir ürün için adet seçin.'); return; }
+
+      const name = document.getElementById('ofName').value.trim();
+      const phone = document.getElementById('ofPhone').value.trim();
+      const addr = document.getElementById('ofAddress').value.trim();
+      const msg = document.getElementById('ofMsg').value.trim();
+      if (!name){ alert('Lütfen adınızı girin.'); return; }
+      if (!phone){ alert('Lütfen telefon numaranızı girin.'); return; }
+      if (!addr){ alert('Lütfen kargo adresinizi yazın.'); return; }
+
+      const sum = chosen.reduce((a, x) => a + x.q * priceNum(x.it.price), 0);
+      let text = `Merhaba! 🚚 Sipariş vermek istiyorum:\n\n`;
+      chosen.forEach(x => { text += `• ${x.q} x ${x.it.name}\n`; });
+      text += `\n💰 *Toplam:* ${sum.toLocaleString('tr-TR')} TL\n\n`;
+      text += `👤 *Ad Soyad:* ${name}\n`;
+      text += `📞 *Telefon:* ${phone}\n`;
+      text += `📍 *Kargo Adresi:* ${addr}\n`;
+      if (msg) text += `📝 *Not:* ${msg}\n`;
+      text += `\nIBAN bilgisini bekliyorum. 🙏`;
+
+      window.open(`https://wa.me/${C.whatsapp}?text=${encodeURIComponent(text)}`, '_blank');
+    });
+
+    // IBAN kutusu — dolu ise numara + kopyala, boşsa "yakında"
+    const ibanBox = document.getElementById('ibanBox');
+    if (ibanBox){
+      if (C.iban){
+        ibanBox.innerHTML =
+          `<h3>IBAN</h3>` +
+          `<div class="iban-num" id="ibanNum">${C.iban}</div>` +
+          (C.ibanName ? `<div class="iban-name">${C.ibanName}</div>` : '') +
+          `<button type="button" class="iban-copy" id="ibanCopy">IBAN'ı Kopyala</button>`;
+        const btn = document.getElementById('ibanCopy');
+        btn.addEventListener('click', () => {
+          const val = C.iban;
+          const done = () => { btn.textContent = 'Kopyalandı ✓'; setTimeout(() => btn.textContent = "IBAN'ı Kopyala", 1600); };
+          if (navigator.clipboard && navigator.clipboard.writeText){
+            navigator.clipboard.writeText(val).then(done).catch(() => {
+              const t = document.getElementById('ibanNum');
+              const rng = document.createRange(); rng.selectNodeContents(t);
+              const sel = getSelection(); sel.removeAllRanges(); sel.addRange(rng); done();
+            });
+          } else {
+            const t = document.getElementById('ibanNum');
+            const rng = document.createRange(); rng.selectNodeContents(t);
+            const sel = getSelection(); sel.removeAllRanges(); sel.addRange(rng); done();
+          }
+        });
+      } else {
+        ibanBox.innerHTML = `<h3>IBAN</h3><p class="iban-empty">IBAN bilgisi yakında eklenecektir.</p>`;
+      }
+    }
+
+    // Menü (fiyat listesi) ve boş Şubeler bölümü artık gizli — sipariş forma taşındı
+    const menuSec = document.getElementById('menu'); if (menuSec) menuSec.style.display = 'none';
+    const navMenu2 = document.getElementById('navMenu'); if (navMenu2) navMenu2.style.display = 'none';
+    const subSec = document.getElementById('subeler');
+    if (subSec && (!Array.isArray(C.branches) || !C.branches.length)) subSec.style.display = 'none';
+  })();
 
   // Özel pasta sipariş formu
   if (C.orderForm) {
